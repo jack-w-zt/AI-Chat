@@ -1,0 +1,30 @@
+#1.用户输入问题，调用Deepseek API ,打印回答
+#2.TODO：支持多轮对话（包括历史对话）
+#3.TODO：输入exit退出，输入clear清空历史
+#4.TODO:每次对话记录追加保存到JSON文件
+
+#用户输入问题
+user_problem =input()
+#导入dotenv模块，加载.env文件中的环境变量
+from dotenv import load_dotenv
+load_dotenv()
+#导入os模块和OpenAI类
+import os
+from openai import OpenAI
+#创建OpenAI客户端实例
+client = OpenAI(
+    api_key=os.environ.get('Deepseek_Api_Key'),#从环境变量读取Api Key
+    base_url="https://api.deepseek.com"#DeepSeek API基础地址
+)
+#发送chat completions请求
+response = client.chat.completions.create(
+    model="deepseek-flash",#指定使用的模型
+    messages = [
+        {"role":"system","content":"You are an interesting, professional, clear-thinking and rational assistant with sound values."},#设置system提示词
+        {"role":"user","content":user_problem},#用户输入内容
+    ],
+    stream=False,#是否启用流式输出，False表示一次性返回
+    reasoning_effort="high",#推理投入程度，需确认模型是否支持
+    extra_body={"thinking":{"type":"enabled"}}#开启思考模式，需确认模型和API是否支持
+)
+print(response.choices[0].message.content)#打印模型输出内容
